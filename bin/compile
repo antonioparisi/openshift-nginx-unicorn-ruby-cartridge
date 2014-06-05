@@ -5,50 +5,92 @@
 set -eo pipefail
 
 mkdir -p "$1/out" "$1/src"
-bin_dir=$(cd "$1/out" && pwd)
-src_dir=$(cd "$1/src" && pwd)
-buildpack=$(dirname $(dirname $0))
+BIN_DIR=$(cd "$1/out" && pwd)
+SRC_DIR=$(cd "$1/src" && pwd)
+BUILDPACK=$(dirname $(dirname $0))
 
-pcre_ver=${PCRE_VERSION:-8.33}
-pcre_file=${PCRE_FILE:-pcre-$pcre_ver.tar.gz}
-pcre_url=${PCRE_URL:-http://sourceforge.net/projects/pcre/files/pcre/$pcre_ver/$pcre_file}
+PCRE_VER=${PCRE_VERSION:-8.33}
+PCRE_FILE=${PCRE_FILE:-pcre-$PCRE_VER.tar.gz}
+PCRE_URL=${PCRE_URL:-http://sourceforge.net/projects/pcre/files/pcre/$PCRE_VER/$PCRE_FILE}
 
-nginx_ver=${NGINX_VERSION:-1.4.4}
-nginx_file=${NGINX_FILE:-nginx-$nginx_ver.tar.gz}
-nginx_url=${NGINX_URL:-http://nginx.org/download/$nginx_file}
+NGINX_VER=${NGINX_VERSION:-1.4.4}
+NGINX_FILE=${NGINX_FILE:-nginx-$NGINX_VER.tar.gz}
+NGINX_URL=${NGINX_URL:-http://nginx.org/download/$NGINX_FILE}
 
+### rbenv setting vars
+RBENV_ROOT="${OPENSHIFT_DATA_DIR}.rbenv"
+RBENV_URL="https://raw.githubusercontent.com/Seppone/openshift-rbenv-installer/master/bin/rbenv-installer"
+RBENV_GEMRC="https://gist.githubusercontent.com/subosito/3342482/raw/31ba5e891a08dec86d205a99460512778472687b/gemrc"
+RBENV_INIT="https://gist.githubusercontent.com/subosito/3342482/raw/9a2ee2bd93ae1a5d6dd2093b4d71871915c66a74/rbenv-init.sh"
 
-if test -d $src_dir/pcre-$pcre_ver
+### Ruby version
+RUBY_VERSION="1.9.3-p547"
+
+#######################
+### Check for PCRE  ###
+#######################
+if test -d $SRC_DIR/pcre-$PCRE_VER
 then
-    echo "-----> Using PCRE $pcre_ver"
+    echo "-----> Using PCRE $PCRE_VER"
 else
-    mkdir -p $src_dir/pcre-$pcre_ver
-    cd $src_dir
+    mkdir -p $SRC_DIR/pcre-$PCRE_VER
+    cd $SRC_DIR
     echo    "       First download, may take several minutes"
-    echo -n "-----> Installing PCRE $pcre_ver..."
-    curl -sOL $pcre_url
-    tar zxf $pcre_file
-    rm -f $pcre_file
+    echo -n "-----> Installing PCRE $PCRE_VER..."
+    curl -sOL $PCRE_URL
+    tar zxf $PCRE_FILE
+    rm -f $PCRE_FILE
     echo " done"
 fi
 
-if test -d $src_dir/nginx-$nginx_ver
+#######################
+### Check for nginx ###
+#######################
+if test -d $SRC_DIR/nginx-$NGINX_VER
 then
-    echo "-----> Using Nginx $nginx_ver"
+    echo "-----> Using Nginx $NGINX_VER"
 else
-    mkdir -p $src_dir/nginx-$nginx_ver
-    cd $src_dir
+    mkdir -p $SRC_DIR/nginx-$NGINX_VER
+    cd $SRC_DIR
     echo    "       First download, may take several minutes"
-    echo -n "-----> Installing Nginx $nginx_ver..."
-    curl -sO $nginx_url
-    tar zxf $nginx_file
-    rm -f $nginx_file
+    echo -n "-----> Installing Nginx $NGINX_VER..."
+    curl -sO $NGINX_URL
+    tar zxf $NGINX_FILE
+    rm -f $NGINX_FILE
     echo " done"
 fi
 
+#######################
+### Check for ruby  ###
+#######################
+if [ -z "$(ruby -v)" ]; then
+  if [ ! -d "${RBENV_ROOT}" ] ; then
+    # Install rbenv
+    cd $OPENSHIFT_DATA_DIR
+    echo    "       First download, may take several minutes"
+    echo -n "-----> Installing rbenv..."
+    curl -sSL $RBENV_URL | bash
+    # Default .gemrc
+    curl -o .gemrc $RBENV_GEMRC
+    # Set global rbenv environment variables
+    curl -O $RBENV_INIT
 
-cd $src_dir/nginx-$nginx_ver/
-./configure --with-pcre=$src_dir/pcre-$pcre_ver/ --with-http_ssl_module
+    source rbenv-init.sh
+
+    #Install ruby
+    echo -n "Installing ruby: $RUBY_VERSION..."
+    rbenv install $RUBY_VERSION
+    rbenv global $RUBY_VERSION
+    echo " done"
+
+    # bundler
+    gem install bundler --config-file ${OPENSHIFT_DATA_DIR}.gemrc
+  fi
+fi
+
+
+cd $SRC_DIR/nginx-$NGINX_VER/
+./configure --with-pcre=$SRC_DIR/pcre-$PCRE_VER/ --with-http_ssl_module
 make
-cp -f objs/nginx $bin_dir
+cp -f objs/nginx $BIN_DIR
 make clean

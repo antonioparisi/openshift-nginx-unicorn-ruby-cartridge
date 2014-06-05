@@ -1,7 +1,7 @@
 error_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/error.log;
 pid        <%= ENV['OPENSHIFT_NGINX_DIR'] %>run/nginx.pid;
 
-worker_processes  2;
+worker_processes  1;
 
 events {
     worker_connections  1024;
@@ -25,7 +25,34 @@ http {
     access_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/access.log  main;
 
     sendfile  on;
-    gzip      on;
+
+    tcp_nopush on; # off may be better for *some* Comet/long-poll stuff
+    tcp_nodelay off; # on may be better for some Comet/long-poll stuff
+
+    # this can be any application server, not just Unicorn/Rainbows!
+    upstream unicorn {
+      # fail_timeout=0 means we always retry an upstream even if it failed
+      # to return a good HTTP response (in case the Unicorn master nukes a
+      # single worker for timing out).
+
+      # for UNIX domain socket setups:
+      server unix:<%= ENV['OPENSHIFT_REPO_DIR']%>/tmp/unicorn.sock fail_timeout=0;
+
+      # for TCP setups, point these to your backend servers
+      # server 192.168.0.7:8080 fail_timeout=0;
+      # server 192.168.0.8:8080 fail_timeout=0;
+      # server 192.168.0.9:8080 fail_timeout=0;
+    }
+
+    gzip on;
+    gzip_http_version 1.0;
+    gzip_proxied any;
+    gzip_min_length 500;
+    gzip_disable "MSIE [1-6]\.";
+    gzip_types text/plain text/html text/xml text/css
+               text/comma-separated-values
+               text/javascript application/x-javascript
+               application/atom+xml;
 
     keepalive_timeout  65;
 

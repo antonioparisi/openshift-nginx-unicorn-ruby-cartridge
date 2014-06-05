@@ -1,14 +1,14 @@
-## Openshift Nginx Cartridge
+## Openshift cartridge: nginx + unicorn + ruby
 
-A cartridge for openshift that enables Nginx to be used as the web server.
+### W.I.P
 
+A cartridge for openshift that enables nginx to be used as the web server and in plus adds unicorn and install ruby as well, ideal for DIY.
 
 ### Installation
 
 To install this cartridge use the cartridge reflector when creating an app
 
-	rhc create-app myapp http://cartreflect-claytondev.rhcloud.com/reflect?github=gsterjov/openshift-nginx-cartridge
-
+	rhc create-app myapp http://cartreflect-claytondev.rhcloud.com/reflect?github=antonioparisi/openshift-nginx-unicorn-ruby-cartridge
 
 ### Configuration
 
