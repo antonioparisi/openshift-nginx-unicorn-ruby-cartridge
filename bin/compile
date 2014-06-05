@@ -20,8 +20,6 @@ NGINX_URL=${NGINX_URL:-http://nginx.org/download/$NGINX_FILE}
 ### rbenv setting vars
 RBENV_ROOT="${OPENSHIFT_DATA_DIR}.rbenv"
 RBENV_URL="https://raw.githubusercontent.com/Seppone/openshift-rbenv-installer/master/bin/rbenv-installer"
-RBENV_GEMRC="https://gist.githubusercontent.com/subosito/3342482/raw/31ba5e891a08dec86d205a99460512778472687b/gemrc"
-RBENV_INIT="https://gist.githubusercontent.com/subosito/3342482/raw/9a2ee2bd93ae1a5d6dd2093b4d71871915c66a74/rbenv-init.sh"
 
 ### Ruby version
 RUBY_VERSION="1.9.3-p547"
@@ -72,13 +70,6 @@ if [ -z "$(ruby -v)" ]; then
     cd $OPENSHIFT_DATA_DIR
     echo    "       First download, may take several minutes"
     echo -n "-----> Installing rbenv..."
-    curl -sSL $RBENV_URL | bash
-    # Default .gemrc
-    curl -o .gemrc $RBENV_GEMRC
-    # Set global rbenv environment variables
-    curl -O $RBENV_INIT
-
-    source rbenv-init.sh
 
     #Install ruby
     echo -n "Installing ruby: $RUBY_VERSION..."
@@ -86,8 +77,15 @@ if [ -z "$(ruby -v)" ]; then
     rbenv global $RUBY_VERSION
     echo " done"
 
-    # bundler
-    gem install bundler --config-file ${OPENSHIFT_DATA_DIR}.gemrc
+    echo -n "Installing rbenv..."
+    curl -sSL $RBENV_URL | bash
+
+    echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >> $OPENSHIFT_DATA_DIR.bash_profile
+    echo 'eval "$(rbenv init -)"' >> $OPENSHIFT_DATA_DIR.bash_profile
+    echo " done"
+
+    # Installing bundler
+    gem install bundler
   fi
 fi
 
