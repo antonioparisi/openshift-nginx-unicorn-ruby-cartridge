@@ -44,6 +44,6 @@ server {
     # Rails error pages
     error_page 500 502 503 504 /500.html;
     location = /500.html {
-      root $RAILS_ROOT$/public;
+    root <%= ENV['OPENSHIFT_REPO_DIR'] %>public;
     }
 }
