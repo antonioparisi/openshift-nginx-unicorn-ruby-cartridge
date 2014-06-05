@@ -58,6 +58,9 @@ else
     tar zxf $NGINX_FILE
     rm -f $NGINX_FILE
     echo " done"
+
+    # Touch log files
+    touch $OPENSHIFT_NGINX_DIRlogs/error.log
 fi
 
 #######################
