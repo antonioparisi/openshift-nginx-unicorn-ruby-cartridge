@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/bash -e
+
+source $OPENSHIFT_CARTRIDGE_SDK_BASH
 
 set -eo pipefail
 
@@ -39,60 +41,53 @@ RUBY_VER=${RUBY_VERSION:-1.9.3-p547}
 #######################
 ### Check for PCRE  ###
 #######################
-if test -d $SRC_DIR/pcre-$PCRE_VER
+if ! test -d $SRC_DIR/pcre-$PCRE_VER
 then
-    echo "-----> Using PCRE $PCRE_VER"
-else
     mkdir -p $SRC_DIR/pcre-$PCRE_VER
     pushd $SRC_DIR >> /dev/null
-    echo    '       First download, may take several minutes'
-    echo -n "-----> Installing PCRE $PCRE_VER..."
+    client_result "       First download, may take several minutes"
+    client_result "-----> Installing PCRE $PCRE_VER..."
     curl -sOL $PCRE_URL
     tar zxf $PCRE_FILE
     rm -f $PCRE_FILE
-    echo ' done'
 fi
 
 #######################
 ### Check for nginx ###
 #######################
-if test -d $SRC_DIR/nginx-$NGINX_VER
+if ! test -d $SRC_DIR/nginx-$NGINX_VER
 then
-    echo "-----> Using Nginx $NGINX_VER"
-else
     mkdir -p $SRC_DIR/nginx-$NGINX_VER
     pushd $SRC_DIR >> /dev/null
-    echo    '       First download, may take several minutes'
-    echo -n "-----> Installing Nginx $NGINX_VER..."
+    client_result "       First download, may take several minutes"
+    client_result "-----> Installing Nginx $NGINX_VER..."
     curl -sO $NGINX_URL
     tar zxf $NGINX_FILE
     rm -f $NGINX_FILE
-    echo ' done'
 
     # Touch log files
-    touch $OPENSHIFT_NGINX_DIRlogs/error.log
+    touch ${OPENSHIFT_NGINX_DIR}logs/error.log
 fi
 
 #######################
 ### Check for rbenv  ###
 #######################
-if [ ! -d "${RBENV_DIR}" ] ; then
+if ! test -d ${RBENV_DIR}
+then
   # Install rbenv
   pushd $OPENSHIFT_DATA_DIR >> /dev/null
-  echo    '       First download, may take several minutes'
-  echo -n '-----> Installing rbenv...'
+  client_result "       First download, may take several minutes"
+  client_result "-----> Installing rbenv..."
 
   curl -sSL $RBENV_URL | bash
 
   echo "export PATH=\"${RBENV_DIR}/bin:${PATH}\"" >> ${OPENSHIFT_DATA_DIR}.bash_profile
   echo "eval \"$(rbenv init -)\"" >> ${OPENSHIFT_DATA_DIR}.bash_profile
-  echo ' done'
 
   #Install ruby
-  echo -n "Installing ruby: $RUBY_VER..."
+  client_result "Installing ruby: $RUBY_VER..."
   rbenv install $RUBY_VER
   rbenv global $RUBY_VER
-  echo ' done'
 
   # Installing bundler
   gem install bundler
