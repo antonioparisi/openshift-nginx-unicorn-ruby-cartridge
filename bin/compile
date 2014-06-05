@@ -71,17 +71,16 @@ if [ -z "$(ruby -v)" ]; then
     echo    "       First download, may take several minutes"
     echo -n "-----> Installing rbenv..."
 
-    #Install ruby
-    echo -n "Installing ruby: $RUBY_VERSION..."
-    rbenv install $RUBY_VERSION
-    rbenv global $RUBY_VERSION
-    echo " done"
-
-    echo -n "Installing rbenv..."
     curl -sSL $RBENV_URL | bash
 
     echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >> $OPENSHIFT_DATA_DIR.bash_profile
     echo 'eval "$(rbenv init -)"' >> $OPENSHIFT_DATA_DIR.bash_profile
+    echo " done"
+
+    #Install ruby
+    echo -n "Installing ruby: $RUBY_VERSION..."
+    rbenv install $RUBY_VERSION
+    rbenv global $RUBY_VERSION
     echo " done"
 
     # Installing bundler
