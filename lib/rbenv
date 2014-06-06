@@ -1,0 +1,39 @@
+#!/bin/bash -e
+
+source $OPENSHIFT_CARTRIDGE_SDK_BASH
+
+#######################
+### RBENV vars      ###
+#######################
+RBENV_DIR=${RBENV_ROOT_DIR:-${OPENSHIFT_DATA_DIR}.rbenv}
+RBENV_URL=${RBENV_URL:-https://raw.githubusercontent.com/Seppone/openshift-rbenv-installer/master/bin/rbenv-installer}
+
+#######################
+### ruby version    ###
+#######################
+RUBY_VER=${RUBY_VERSION:-1.9.3-p547}
+
+#######################
+### Check for rbenv  ###
+#######################
+if ! test -d ${RBENV_DIR}
+then
+  # Install rbenv
+  pushd $OPENSHIFT_DATA_DIR >> /dev/null
+  client_result "       First download, may take several minutes"
+  client_result "-----> Installing rbenv..."
+
+  curl -sSL $RBENV_URL | bash
+
+  export PATH="${RBENV_DIR}/bin:${PATH}"
+  eval "$(rbenv init -)"
+
+  #Install ruby
+  client_result "Installing ruby: $RUBY_VER..."
+  rbenv install $RUBY_VER
+  rbenv global $RUBY_VER
+
+  # Installing bundler
+  gem install bundler
+fi
+

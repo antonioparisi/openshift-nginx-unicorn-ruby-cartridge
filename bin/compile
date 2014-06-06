@@ -28,17 +28,6 @@ NGINX_FILE=${NGINX_FILE:-nginx-$NGINX_VER.tar.gz}
 NGINX_URL=${NGINX_URL:-http://nginx.org/download/$NGINX_FILE}
 
 #######################
-### RBENV vars      ###
-#######################
-RBENV_DIR=${RBENV_ROOT_DIR:-${OPENSHIFT_DATA_DIR}.rbenv}
-RBENV_URL=${RBENV_URL:-https://raw.githubusercontent.com/Seppone/openshift-rbenv-installer/master/bin/rbenv-installer}
-
-#######################
-### ruby version    ###
-#######################
-RUBY_VER=${RUBY_VERSION:-1.9.3-p547}
-
-#######################
 ### Check for PCRE  ###
 #######################
 if ! test -d $SRC_DIR/pcre-$PCRE_VER
@@ -68,31 +57,6 @@ then
     # Touch log files
     touch ${OPENSHIFT_NGINX_DIR}logs/error.log
 fi
-
-#######################
-### Check for rbenv  ###
-#######################
-if ! test -d ${RBENV_DIR}
-then
-  # Install rbenv
-  pushd $OPENSHIFT_DATA_DIR >> /dev/null
-  client_result "       First download, may take several minutes"
-  client_result "-----> Installing rbenv..."
-
-  curl -sSL $RBENV_URL | bash
-
-  echo "export PATH=\"${RBENV_DIR}/bin:${PATH}\"" >> ${OPENSHIFT_DATA_DIR}.bash_profile
-  echo "eval \"$(rbenv init -)\"" >> ${OPENSHIFT_DATA_DIR}.bash_profile
-
-  #Install ruby
-  client_result "Installing ruby: $RUBY_VER..."
-  rbenv install $RUBY_VER
-  rbenv global $RUBY_VER
-
-  # Installing bundler
-  gem install bundler
-fi
-
 
 pushd $SRC_DIR/nginx-$NGINX_VER/ >> /dev/null
 ./configure --with-pcre=$SRC_DIR/pcre-$PCRE_VER/ --with-http_ssl_module

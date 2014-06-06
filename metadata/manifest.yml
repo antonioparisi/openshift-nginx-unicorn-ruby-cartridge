@@ -3,9 +3,9 @@ Cartridge-Short-Name: NGINX
 Display-Name: Nginx
 Version: "1.4.4"
 Versions: ["1.4.4"]
-Website: https://github.com/gsterjov/openshift-nginx-cart
-Cartridge-Version: 0.0.2
-Cartridge-Vendor: gsterjov
+Website: https://github.com/antonioparisi/openshift-nginx-unicorn-ruby-cartridge
+Cartridge-Version: 0.0.1
+Cartridge-Vendor: antonioparisi
 Categories:
   - service
   - nginx
