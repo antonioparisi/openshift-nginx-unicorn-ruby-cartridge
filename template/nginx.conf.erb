@@ -1,5 +1,6 @@
 server {
-    listen  <%= ENV['OPENSHIFT_NGINX_IP'] %>:<%= ENV['OPENSHIFT_NGINX_PORT'] %> default deferred;
+    # spdy enabled
+    listen  <%= ENV['OPENSHIFT_NGINX_IP'] %>:<%= ENV['OPENSHIFT_NGINX_PORT'] %> spdy;
 
     client_max_body_size 4G;
     server_name _;

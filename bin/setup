@@ -16,8 +16,8 @@ echo "$version" > env/NGINX_VERSION
 
 
 for dir in logs run; do
-	mkdir -p $dir
+  mkdir -p $dir
 done
 
 # rbenv
-source "lib/rbenv"
+#source "lib/rbenv"

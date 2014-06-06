@@ -23,7 +23,7 @@ PCRE_URL=${PCRE_URL:-http://sourceforge.net/projects/pcre/files/pcre/$PCRE_VER/$
 #######################
 ### NGINX vars      ###
 #######################
-NGINX_VER=${NGINX_VERSION:-1.4.4}
+NGINX_VER=${NGINX_VERSION:-1.7.1}
 NGINX_FILE=${NGINX_FILE:-nginx-$NGINX_VER.tar.gz}
 NGINX_URL=${NGINX_URL:-http://nginx.org/download/$NGINX_FILE}
 
@@ -59,7 +59,7 @@ then
 fi
 
 pushd $SRC_DIR/nginx-$NGINX_VER/ >> /dev/null
-./configure --with-pcre=$SRC_DIR/pcre-$PCRE_VER/ --with-http_ssl_module
+./configure --with-pcre=$SRC_DIR/pcre-$PCRE_VER/ --with-http_ssl_module --with-http_spdy_module
 make
 cp -f objs/nginx $BIN_DIR
 make clean
